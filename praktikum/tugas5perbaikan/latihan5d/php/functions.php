@@ -1,15 +1,18 @@
 <?php
-// koneksi ke database
-$conn = mysqli_connect("localhost", "root", "");
+function koneksi()
+{
+    $conn = mysqli_connect("localhost", "root", "");
+    mysqli_select_db($conn, "pw_tubess_203040035");
 
-// memilih database
-mysqli_select_db($conn, "pw_tubess_203040035");
+    return $conn;
+}
 
-function query($query){
-    global $conn;
-    $result = mysqli_query($conn, $query);
+function query($sql)
+{
+    $conn = koneksi();
+    $result = mysqli_query($conn, "$sql");
     $rows = [];
-    while( $row = mysqli_fetch_assoc($result) ) {
+    while ($row = mysqli_fetch_assoc($result)) {
         $rows[] = $row;
     }
     return $rows;
@@ -60,31 +63,6 @@ function ubah($data)
             ";
 
     mysqli_query($conn, $query);
-
-    return mysqli_affected_rows($conn);
-}
-
-function registrasi($data)
-{
-    $conn = koneksi();
-    $username = strtolower(stripcslashes($data["username"]));
-    $password = mysqli_real_escape_string($conn, $data["password"]);
-
-    //cek username sudah ada atau belum
-    $result = mysqli_query($conn, "SELECT username FROM user WHERE username = '$username' ");
-    if(mysqli_fetch_assoc($result)) {
-        echo "<script>
-            alert('username sudah digunakan');
-            </script>";
-        return false;
-    }
-
-    //enkripsi password
-    $password = password_hash($password, PASSWORD_DEFAULT);
-
-    //tambah user baru
-    $query_tambah = "INSERT INTO user VALUES('', '$username', '$password')";
-    mysqli_query($conn, $query_tambah);
 
     return mysqli_affected_rows($conn);
 }
